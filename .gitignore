@@ -1,4 +1,15 @@
+# Python virtual environments
 venv*
-__pycache__
-pyvenv.cfg
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Environment and system files
 .env
+.DS_Store
+
+# Database files
+instance/
+*.db
