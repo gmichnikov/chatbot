@@ -7,7 +7,7 @@
 <div class="chat-container">
   <div class="chat-header">
     <span class="chat-icon">📖</span>
-    <h1>Greg Bot</h1>
+    <h1>Greg-Bot</h1>
     <div class="user-info">
       <span>{{ current_user.email }}</span>
       <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
@@ -36,7 +36,7 @@
 
       <div class="chat-messages" id="chatMessages">
         <div class="empty-state" id="emptyState">
-          <p>Send a message to start chatting with the Greg Bot</p>
+          <p>Send a message to start chatting with the Greg-Bot</p>
           <div class="suggested-questions" id="suggestedQuestions">
             <button class="suggested-question">
               Give me some background about Greg
@@ -46,6 +46,9 @@
             </button>
             <button class="suggested-question">
               Does Greg have any background in education?
+            </button>
+            <button class="suggested-question">
+              What are some other questions I could ask about Greg?
             </button>
           </div>
         </div>

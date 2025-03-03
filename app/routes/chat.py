@@ -156,7 +156,7 @@ def generate_bot_response(user_message, conversation_id, user_id):
             ChatMessage.timestamp
         ).all()
 
-        system_content = f"""You are GregBot, a helpful and friendly assistant who shares information about Greg Michnikov. Respond fairly briefly. Your response absolutely must be in plain text -- any use of markdown will look terrible so please don't do it.
+        system_content = f"""You are Greg-Bot, a helpful and friendly assistant who shares information about Greg Michnikov. Respond fairly briefly. Your response absolutely must be in plain text -- any use of markdown will look terrible so please don't do it.
 
         When creating bullet points:
         1. Always use a full line break (\\n) before each bullet point
@@ -170,7 +170,7 @@ def generate_bot_response(user_message, conversation_id, user_id):
         Keep responses concise. Never use markdown formatting.
 
         {GREG_CONTEXT}"""
-        
+
         # Format messages for the OpenAI API
         formatted_messages = [
             {"role": "system", "content": system_content}

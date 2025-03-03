@@ -9,7 +9,7 @@
 {% else %}
 <a href="{{ url_for('auth.login') }}">Login</a> |
 <a href="{{ url_for('auth.register') }}">Register</a>
-<p>No one is logged in</p>
+<p>Test account -- email: demo@example.com password: test</p>
 {% endif %} {% if logged_in and current_user.is_admin %}
 <hr />
 <a href="{{ url_for('admin.reset_password') }}">Admin: Reset Passwords</a> |
