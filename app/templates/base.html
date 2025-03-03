@@ -6,6 +6,7 @@
         <meta name="description" content="Chatbot application">
         <title>{% block title %}{% endblock %} - Chatbot</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        {% block styles %}{% endblock %}
     </head>
 
     <body>
