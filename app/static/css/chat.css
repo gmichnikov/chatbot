@@ -251,6 +251,29 @@
     cursor: not-allowed;
 }
 
+/* Add this with the other button styles */
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin-left: 10px;
+    cursor: pointer;
+    display: none;  /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+}
+
+.delete-button:hover {
+    background-color: #bb2d3b;
+}
+
+.delete-button.visible {
+    display: flex;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
     .chat-body {

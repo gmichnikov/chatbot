@@ -117,6 +117,25 @@ def send_message():
         'conversation_id': conversation_id
     })
 
+@chat_bp.route('/api/conversations/<conversation_id>', methods=['DELETE'])
+@login_required
+def delete_conversation(conversation_id):
+    """Delete a specific conversation and all its messages"""
+    try:
+        # Delete all messages for this conversation
+        ChatMessage.query.filter_by(
+            user_id=current_user.id,
+            conversation_id=conversation_id
+        ).delete()
+        
+        # Commit the changes
+        db.session.commit()
+        
+        return jsonify({'status': 'success'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 def generate_bot_response(user_message):
     """
     Generate a response from the chatbot.

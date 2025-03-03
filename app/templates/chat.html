@@ -51,6 +51,7 @@
           placeholder="Type your message..."
         />
         <button id="sendButton" class="send-button" disabled>➤</button>
+        <button id="deleteButton" class="delete-button">🗑️</button>
       </div>
     </div>
   </div>
@@ -69,6 +70,7 @@
   const sendButton = document.getElementById("sendButton");
   const conversationList = document.getElementById("conversationList");
   const newConversationBtn = document.getElementById("newConversationBtn");
+  const deleteButton = document.getElementById("deleteButton");
 
   // Add debug console logs to check elements
   console.log("Chat input element found:", chatInput);
@@ -154,6 +156,8 @@
           // Show empty state
           showEmptyState();
         }
+
+        updateDeleteButton(); // Add this line
       })
       .catch((error) => console.error("Error loading messages:", error));
   }
@@ -174,6 +178,7 @@
     // Make empty state visible
     emptyState.style.display = "flex";
     hasMessages = false;
+    updateDeleteButton(); // Add this line
   }
 
   // Function to hide the empty state
@@ -249,6 +254,7 @@
         // Remove empty state when we get a successful response
         hideEmptyState();
         hasMessages = true;
+        updateDeleteButton(); // Add this line
 
         // Always update the conversation ID
         currentConversationId = data.conversation_id;
@@ -276,6 +282,15 @@
       });
   }
 
+  // Function to update the delete button visibility
+  function updateDeleteButton() {
+    if (currentConversationId && hasMessages) {
+      deleteButton.classList.add("visible");
+    } else {
+      deleteButton.classList.remove("visible");
+    }
+  }
+
   // Event handlers for the new conversation button
   newConversationBtn.addEventListener("click", () => {
     console.log("New conversation button clicked");
@@ -295,6 +310,42 @@
 
     // Ensure the chat input is focused
     chatInput.focus();
+  });
+
+  // Add event listener for delete button
+  deleteButton.addEventListener("click", () => {
+    if (!currentConversationId) return;
+
+    if (
+      confirm(
+        "Are you sure you want to delete this conversation? This action cannot be undone."
+      )
+    ) {
+      fetch(`/api/conversations/${currentConversationId}`, {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Failed to delete conversation");
+
+          // Clear current conversation
+          currentConversationId = null;
+          hasMessages = false;
+          chatMessages.innerHTML = "";
+
+          // Show empty state
+          showEmptyState();
+
+          // Update delete button visibility
+          updateDeleteButton();
+
+          // Reload conversation list
+          loadConversations();
+        })
+        .catch((error) => {
+          console.error("Error deleting conversation:", error);
+          alert("Failed to delete conversation. Please try again.");
+        });
+    }
   });
 
   // Load conversations on page load
