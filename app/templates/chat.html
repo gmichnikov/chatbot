@@ -132,36 +132,48 @@
       .then((response) => response.json())
       .then((messages) => {
         console.log("Messages loaded:", messages);
+
+        // Clear all content first
         chatMessages.innerHTML = "";
+
+        // Re-add the empty state div (it was cleared by innerHTML = "")
+        chatMessages.appendChild(emptyState);
+
         hasMessages = messages.length > 0;
 
         if (hasMessages) {
+          // Hide empty state
           hideEmptyState();
+          // Add messages
           messages.forEach((message) => {
             addMessageToDOM(message.content, message.is_user);
           });
           // Scroll to bottom
           chatMessages.scrollTop = chatMessages.scrollHeight;
         } else {
+          // Show empty state
           showEmptyState();
         }
       })
       .catch((error) => console.error("Error loading messages:", error));
   }
 
+  // Function to show the empty state with suggested questions
   function showEmptyState() {
     console.log("Showing empty state with suggested questions");
-    // Make sure the empty state is visible with flex display
+
+    // First append empty state if it's not already in the messages
+    if (!chatMessages.contains(emptyState)) {
+      chatMessages.appendChild(emptyState);
+    }
+
+    // Clear any existing messages
+    const messages = chatMessages.querySelectorAll(".message");
+    messages.forEach((message) => message.remove());
+
+    // Make empty state visible
     emptyState.style.display = "flex";
-    console.log("Empty state display style set to flex");
-    // Make sure suggested questions are visible
-    suggestedQuestions.style.display = "flex";
-    console.log("Suggested questions display style set to flex");
-
     hasMessages = false;
-
-    // Make sure the messages area is cleared
-    chatMessages.innerHTML = "";
   }
 
   // Function to hide the empty state
@@ -269,6 +281,10 @@
     console.log("New conversation button clicked");
     currentConversationId = null;
 
+    // Clear existing messages first
+    const messages = chatMessages.querySelectorAll(".message");
+    messages.forEach((message) => message.remove());
+
     // Show the empty state with suggested questions
     showEmptyState();
 
@@ -276,6 +292,9 @@
     document.querySelectorAll(".conversation-item").forEach((item) => {
       item.classList.remove("active");
     });
+
+    // Ensure the chat input is focused
+    chatInput.focus();
   });
 
   // Load conversations on page load
