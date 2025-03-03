@@ -24,7 +24,7 @@ python-dotenv==1.0.0
 pytz==2023.3.post1
 requests
 SQLAlchemy==2.0.20
-typing_extensions==4.7.1
+typing_extensions>=4.11,<5
 Werkzeug==2.3.7
 WTForms==3.0.1
 zipp==3.16.2
