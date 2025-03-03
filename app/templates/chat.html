@@ -200,13 +200,14 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  // Format date for display
+  // Find and replace the formatDate function with:
   function formatDate(isoString) {
     const date = new Date(isoString);
     return (
       date.toLocaleDateString() +
       " " +
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
+      " UTC"
     );
   }
 
