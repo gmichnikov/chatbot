@@ -73,6 +73,8 @@
   // Add debug console logs to check elements
   console.log("Chat input element found:", chatInput);
   console.log("Send button element found:", sendButton);
+  console.log("Empty state element found:", emptyState);
+  console.log("Suggested questions element found:", suggestedQuestions);
 
   // Function to load user's conversations
   function loadConversations() {
@@ -101,8 +103,12 @@
             conversationList.appendChild(conversationEl);
           });
 
-          // Load the first conversation by default
-          loadConversation(conversations[0].id);
+          // Change: Don't automatically load the first conversation
+          if (conversationList.querySelector(".empty-conversations")) {
+            conversationList.querySelector(
+              ".empty-conversations"
+            ).style.display = "none";
+          }
         }
       })
       .catch((error) => console.error("Error loading conversations:", error));
@@ -130,17 +136,38 @@
         hasMessages = messages.length > 0;
 
         if (hasMessages) {
-          emptyState.style.display = "none";
+          hideEmptyState();
           messages.forEach((message) => {
             addMessageToDOM(message.content, message.is_user);
           });
           // Scroll to bottom
           chatMessages.scrollTop = chatMessages.scrollHeight;
         } else {
-          emptyState.style.display = "flex";
+          showEmptyState();
         }
       })
       .catch((error) => console.error("Error loading messages:", error));
+  }
+
+  function showEmptyState() {
+    console.log("Showing empty state with suggested questions");
+    // Make sure the empty state is visible with flex display
+    emptyState.style.display = "flex";
+    console.log("Empty state display style set to flex");
+    // Make sure suggested questions are visible
+    suggestedQuestions.style.display = "flex";
+    console.log("Suggested questions display style set to flex");
+
+    hasMessages = false;
+
+    // Make sure the messages area is cleared
+    chatMessages.innerHTML = "";
+  }
+
+  // Function to hide the empty state
+  function hideEmptyState() {
+    console.log("Hiding empty state");
+    emptyState.style.display = "none";
   }
 
   // Function to add a message to the DOM
@@ -199,25 +226,22 @@
     })
       .then((response) => {
         console.log("Response status:", response.status);
+        if (!response.ok) {
+          throw new Error("Server returned " + response.status);
+        }
         return response.json();
       })
       .then((data) => {
         console.log("Response data:", data);
 
-        // Remove empty state if this is first message
-        if (!hasMessages) {
-          emptyState.style.display = "none";
-          hasMessages = true;
-        }
+        // Remove empty state when we get a successful response
+        hideEmptyState();
+        hasMessages = true;
 
-        // Update conversation ID if this is a new conversation
-        if (!currentConversationId) {
-          currentConversationId = data.conversation_id;
-          // Reload conversations to show the new one
-          loadConversations();
-        }
+        // Always update the conversation ID
+        currentConversationId = data.conversation_id;
 
-        // Add user message (if not already added)
+        // Add user message
         addMessageToDOM(data.user_message.content, true);
 
         // Add bot response
@@ -229,10 +253,13 @@
 
         // Focus back on input
         chatInput.focus();
+
+        // Reload conversations after a slight delay
+        setTimeout(loadConversations, 500);
       })
       .catch((error) => {
         console.error("Error sending message:", error);
-        alert("Error: " + error.message);
+        alert("Error sending message. Please try again.");
         sendButton.disabled = false;
       });
   }
@@ -241,9 +268,9 @@
   newConversationBtn.addEventListener("click", () => {
     console.log("New conversation button clicked");
     currentConversationId = null;
-    chatMessages.innerHTML = "";
-    emptyState.style.display = "flex";
-    hasMessages = false;
+
+    // Show the empty state with suggested questions
+    showEmptyState();
 
     // Remove active class from all conversations
     document.querySelectorAll(".conversation-item").forEach((item) => {
@@ -255,8 +282,11 @@
   document.addEventListener("DOMContentLoaded", function () {
     console.log("DOM fully loaded");
 
-    // Load conversations
+    // Load conversations in sidebar but don't select any
     loadConversations();
+
+    // Start with a blank state and suggested questions
+    showEmptyState();
 
     // Add input event listener
     chatInput.addEventListener("input", function () {

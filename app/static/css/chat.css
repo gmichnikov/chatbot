@@ -149,6 +149,10 @@
     overflow-y: auto;
     padding: 15px;
     background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .message {
@@ -175,8 +179,7 @@
 
 /* Empty state */
 .empty-state {
-    height: 100%;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -190,9 +193,7 @@
 }
 
 .suggested-questions {
-    width: 100%;
-    max-width: 320px;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     gap: 10px;
 }
