@@ -253,9 +253,9 @@
 
 /* Add this with the other button styles */
 .delete-button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
+    background-color: white;
+    color: #dc3545;
+    border: 1px solid #dc3545;
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -264,10 +264,12 @@
     display: none;  /* Hidden by default */
     justify-content: center;
     align-items: center;
+    transition: all 0.2s ease;  /* Match the style of other interactive elements */
 }
 
 .delete-button:hover {
-    background-color: #bb2d3b;
+    background-color: #dc3545;
+    color: white;
 }
 
 .delete-button.visible {
