@@ -198,24 +198,26 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 300px;
+  max-width: 400px;
+  width: 80%;
   margin: 0 auto;
 }
 
 .suggested-question {
-  padding: 10px 15px;
+  padding: 12px 15px;
   background-color: white;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
   color: #495057;
+  transition: background-color 0.2s ease;
 }
 
 .suggested-question:hover {
   background-color: #f1f3f5;
+  border-color: #c1c9d0;
 }
-
 /* Input area */
 .chat-input-area {
   display: flex;

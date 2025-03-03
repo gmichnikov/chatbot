@@ -157,7 +157,7 @@ def generate_bot_response(user_message, conversation_id, user_id):
 
         # Format messages for the OpenAI API
         formatted_messages = [
-            {"role": "system", "content": "You are a helpful assistant."}
+            {"role": "system", "content": "You are a helpful assistant whose job is to accurately share info about Greg Michnikov."}
         ]
         
         # Add conversation history (excluding the most recent user message which we'll add separately)
