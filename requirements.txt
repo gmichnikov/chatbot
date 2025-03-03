@@ -21,6 +21,7 @@ packaging==23.1
 psycopg2-binary==2.9.10
 python-dotenv==1.0.0
 pytz==2023.3.post1
+requests
 SQLAlchemy==2.0.20
 typing_extensions==4.7.1
 Werkzeug==2.3.7

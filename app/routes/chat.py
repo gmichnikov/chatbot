@@ -69,9 +69,8 @@ def send_message():
     # Create a new conversation if needed
     if not conversation_id:
         conversation_id = str(uuid4())
-    
-    # Validate the conversation belongs to the user if it exists
-    if conversation_id != str(uuid4()):
+    # Only validate existing conversations
+    elif conversation_id:
         message_count = ChatMessage.query.filter(
             ChatMessage.user_id == current_user.id,
             ChatMessage.conversation_id == conversation_id

@@ -1,243 +1,297 @@
-{% extends 'base.html' %}
-
-{% block title %}Chat{% endblock %}
-
-{% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
-{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Chat{% endblock %} {% block styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/chat.css') }}"
+/>
+{% endblock %} {% block content %}
 <div class="chat-container">
-    <div class="chat-header">
-        <span class="chat-icon">🎭</span>
-        <h1>Poetry Bot</h1>
-        <div class="user-info">
-            <span>{{ current_user.email }}</span>
-            <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
-            <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
-        </div>
+  <div class="chat-header">
+    <span class="chat-icon">🎭</span>
+    <h1>Poetry Bot</h1>
+    <div class="user-info">
+      <span>{{ current_user.email }}</span>
+      <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
+      <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
     </div>
-    
-    <div class="chat-body">
-        <div class="chat-sidebar" id="chatSidebar">
-            <h3>Conversations</h3>
-            <div class="conversation-list" id="conversationList">
-                <!-- Conversations will be loaded here -->
-                <div class="empty-conversations">No conversations yet.</div>
-            </div>
-            <button id="newConversationBtn" class="new-conversation-btn">New Conversation</button>
-        </div>
-        
-        <div class="chat-main">
-            <div class="chat-messages" id="chatMessages">
-                <div class="empty-state" id="emptyState">
-                    <p>Send a message to start chatting with the Poetry Bot</p>
-                    <div class="suggested-questions" id="suggestedQuestions">
-                        <button class="suggested-question">What is the meaning of life?</button>
-                        <button class="suggested-question">Tell me about the stars</button>
-                        <button class="suggested-question">How does poetry heal the soul?</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="chat-input-area">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Type your message...">
-                <button id="sendButton" class="send-button" disabled>➤</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+  </div>
 
-{% block scripts %}
+  <div class="chat-body">
+    <div class="chat-sidebar" id="chatSidebar">
+      <h3>Conversations</h3>
+      <div class="conversation-list" id="conversationList">
+        <!-- Conversations will be loaded here -->
+        <div class="empty-conversations">No conversations yet.</div>
+      </div>
+      <button id="newConversationBtn" class="new-conversation-btn">
+        New Conversation
+      </button>
+    </div>
+
+    <div class="chat-main">
+      <div class="chat-messages" id="chatMessages">
+        <div class="empty-state" id="emptyState">
+          <p>Send a message to start chatting with the Poetry Bot</p>
+          <div class="suggested-questions" id="suggestedQuestions">
+            <button class="suggested-question">
+              What is the meaning of life?
+            </button>
+            <button class="suggested-question">Tell me about the stars</button>
+            <button class="suggested-question">
+              How does poetry heal the soul?
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <input
+          type="text"
+          id="chatInput"
+          class="chat-input"
+          placeholder="Type your message..."
+        />
+        <button id="sendButton" class="send-button" disabled>➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
 <script>
-    // Current conversation data
-    let currentConversationId = null;
-    let hasMessages = false;
-    
-    // DOM elements
-    const chatMessages = document.getElementById('chatMessages');
-    const emptyState = document.getElementById('emptyState');
-    const suggestedQuestions = document.getElementById('suggestedQuestions');
-    const chatInput = document.getElementById('chatInput');
-    const sendButton = document.getElementById('sendButton');
-    const conversationList = document.getElementById('conversationList');
-    const newConversationBtn = document.getElementById('newConversationBtn');
-    
-    // Load conversations on page load
-    document.addEventListener('DOMContentLoaded', loadConversations);
-    
-    // Function to load user's conversations
-    function loadConversations() {
-        fetch('/api/conversations')
-            .then(response => response.json())
-            .then(conversations => {
-                if (conversations.length > 0) {
-                    conversationList.innerHTML = '';
-                    conversations.forEach(conversation => {
-                        const conversationEl = document.createElement('div');
-                        conversationEl.classList.add('conversation-item');
-                        conversationEl.dataset.id = conversation.id;
-                        conversationEl.innerHTML = `
-                            <div class="conversation-title">${conversation.title}</div>
-                            <div class="conversation-date">${formatDate(conversation.started)}</div>
-                        `;
-                        conversationEl.addEventListener('click', () => loadConversation(conversation.id));
-                        conversationList.appendChild(conversationEl);
-                    });
-                    
-                    // Load the first conversation by default
-                    loadConversation(conversations[0].id);
-                }
-            })
-            .catch(error => console.error('Error loading conversations:', error));
-    }
-    
-    // Function to load a specific conversation
-    function loadConversation(conversationId) {
-        currentConversationId = conversationId;
-        
-        // Update active conversation in sidebar
-        document.querySelectorAll('.conversation-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.dataset.id === conversationId) {
-                item.classList.add('active');
-            }
-        });
-        
-        // Load messages for this conversation
-        fetch(`/api/messages/${conversationId}`)
-            .then(response => response.json())
-            .then(messages => {
-                chatMessages.innerHTML = '';
-                hasMessages = messages.length > 0;
-                
-                if (hasMessages) {
-                    emptyState.style.display = 'none';
-                    messages.forEach(message => {
-                        addMessageToDOM(message.content, message.is_user);
-                    });
-                    // Scroll to bottom
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                } else {
-                    emptyState.style.display = 'flex';
-                }
-            })
-            .catch(error => console.error('Error loading messages:', error));
-    }
-    
-    // Function to start a new conversation
-    newConversationBtn.addEventListener('click', () => {
-        currentConversationId = null;
-        chatMessages.innerHTML = '';
-        emptyState.style.display = 'flex';
-        hasMessages = false;
-        
-        // Remove active class from all conversations
-        document.querySelectorAll('.conversation-item').forEach(item => {
-            item.classList.remove('active');
-        });
-    });
-    
-    // Function to send a message
-    function sendMessage() {
-        const message = chatInput.value.trim();
-        if (!message) return;
-        
-        // Show loading state
-        sendButton.disabled = true;
-        
-        // Prepare request data
-        const requestData = {
-            message: message,
-            conversation_id: currentConversationId
-        };
-        
-        // Send the message to the server
-        fetch('/api/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Remove empty state if this is first message
-            if (!hasMessages) {
-                emptyState.style.display = 'none';
-                hasMessages = true;
-            }
-            
-            // Update conversation ID if this is a new conversation
-            if (!currentConversationId) {
-                currentConversationId = data.conversation_id;
-                // Reload conversations to show the new one
-                loadConversations();
-            }
-            
-            // Add user message (if not already added)
-            addMessageToDOM(data.user_message.content, true);
-            
-            // Add bot response
-            addMessageToDOM(data.bot_message.content, false);
-            
-            // Clear input and enable button
-            chatInput.value = '';
-            sendButton.disabled = false;
-            
-            // Focus back on input
-            chatInput.focus();
-        })
-        .catch(error => {
-            console.error('Error sending message:', error);
-            sendButton.disabled = false;
-        });
-    }
-    
-    // Function to add a message to the DOM
-    function addMessageToDOM(text, isUser) {
-        const messageEl = document.createElement('div');
-        messageEl.classList.add('message');
-        messageEl.classList.add(isUser ? 'user-message' : 'bot-message');
-        messageEl.textContent = text;
-        
-        chatMessages.appendChild(messageEl);
-        
-        // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    // Format date for display
-    function formatDate(isoString) {
-        const date = new Date(isoString);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    }
-    
-    // Event listeners
-    chatInput.addEventListener('input', function() {
-        sendButton.disabled = this.value.trim() === '';
-    });
-    
-    chatInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && this.value.trim()) {
-            e.preventDefault();
-            sendMessage();
+  // Current conversation data
+  let currentConversationId = null;
+  let hasMessages = false;
+
+  // DOM elements
+  const chatMessages = document.getElementById("chatMessages");
+  const emptyState = document.getElementById("emptyState");
+  const suggestedQuestions = document.getElementById("suggestedQuestions");
+  const chatInput = document.getElementById("chatInput");
+  const sendButton = document.getElementById("sendButton");
+  const conversationList = document.getElementById("conversationList");
+  const newConversationBtn = document.getElementById("newConversationBtn");
+
+  // Add debug console logs to check elements
+  console.log("Chat input element found:", chatInput);
+  console.log("Send button element found:", sendButton);
+
+  // Function to load user's conversations
+  function loadConversations() {
+    console.log("Loading conversations");
+    fetch("/api/conversations")
+      .then((response) => response.json())
+      .then((conversations) => {
+        console.log("Conversations loaded:", conversations);
+        if (conversations.length > 0) {
+          conversationList.innerHTML = "";
+          conversations.forEach((conversation) => {
+            const conversationEl = document.createElement("div");
+            conversationEl.classList.add("conversation-item");
+            conversationEl.dataset.id = conversation.id;
+            conversationEl.innerHTML = `
+                        <div class="conversation-title">${
+                          conversation.title
+                        }</div>
+                        <div class="conversation-date">${formatDate(
+                          conversation.started
+                        )}</div>
+                    `;
+            conversationEl.addEventListener("click", () =>
+              loadConversation(conversation.id)
+            );
+            conversationList.appendChild(conversationEl);
+          });
+
+          // Load the first conversation by default
+          loadConversation(conversations[0].id);
         }
+      })
+      .catch((error) => console.error("Error loading conversations:", error));
+  }
+
+  // Function to load a specific conversation
+  function loadConversation(conversationId) {
+    console.log("Loading conversation:", conversationId);
+    currentConversationId = conversationId;
+
+    // Update active conversation in sidebar
+    document.querySelectorAll(".conversation-item").forEach((item) => {
+      item.classList.remove("active");
+      if (item.dataset.id === conversationId) {
+        item.classList.add("active");
+      }
     });
-    
-    sendButton.addEventListener('click', sendMessage);
-    
+
+    // Load messages for this conversation
+    fetch(`/api/messages/${conversationId}`)
+      .then((response) => response.json())
+      .then((messages) => {
+        console.log("Messages loaded:", messages);
+        chatMessages.innerHTML = "";
+        hasMessages = messages.length > 0;
+
+        if (hasMessages) {
+          emptyState.style.display = "none";
+          messages.forEach((message) => {
+            addMessageToDOM(message.content, message.is_user);
+          });
+          // Scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        } else {
+          emptyState.style.display = "flex";
+        }
+      })
+      .catch((error) => console.error("Error loading messages:", error));
+  }
+
+  // Function to add a message to the DOM
+  function addMessageToDOM(text, isUser) {
+    const messageEl = document.createElement("div");
+    messageEl.classList.add("message");
+    messageEl.classList.add(isUser ? "user-message" : "bot-message");
+    messageEl.textContent = text;
+
+    chatMessages.appendChild(messageEl);
+
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // Format date for display
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+  }
+
+  // Function to send a message
+  function sendMessage() {
+    console.log("sendMessage function called");
+    const message = chatInput.value.trim();
+    console.log("Message to send:", message);
+
+    if (!message) {
+      console.log("Empty message, not sending");
+      return;
+    }
+
+    // Show loading state
+    console.log("Disabling send button for loading state");
+    sendButton.disabled = true;
+
+    // Prepare request data
+    const requestData = {
+      message: message,
+      conversation_id: currentConversationId,
+    };
+
+    console.log("Request payload:", requestData);
+
+    // Send the message to the server
+    fetch("/api/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => {
+        console.log("Response status:", response.status);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Response data:", data);
+
+        // Remove empty state if this is first message
+        if (!hasMessages) {
+          emptyState.style.display = "none";
+          hasMessages = true;
+        }
+
+        // Update conversation ID if this is a new conversation
+        if (!currentConversationId) {
+          currentConversationId = data.conversation_id;
+          // Reload conversations to show the new one
+          loadConversations();
+        }
+
+        // Add user message (if not already added)
+        addMessageToDOM(data.user_message.content, true);
+
+        // Add bot response
+        addMessageToDOM(data.bot_message.content, false);
+
+        // Clear input and enable button
+        chatInput.value = "";
+        sendButton.disabled = true;
+
+        // Focus back on input
+        chatInput.focus();
+      })
+      .catch((error) => {
+        console.error("Error sending message:", error);
+        alert("Error: " + error.message);
+        sendButton.disabled = false;
+      });
+  }
+
+  // Event handlers for the new conversation button
+  newConversationBtn.addEventListener("click", () => {
+    console.log("New conversation button clicked");
+    currentConversationId = null;
+    chatMessages.innerHTML = "";
+    emptyState.style.display = "flex";
+    hasMessages = false;
+
+    // Remove active class from all conversations
+    document.querySelectorAll(".conversation-item").forEach((item) => {
+      item.classList.remove("active");
+    });
+  });
+
+  // Load conversations on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM fully loaded");
+
+    // Load conversations
+    loadConversations();
+
+    // Add input event listener
+    chatInput.addEventListener("input", function () {
+      console.log("Input event fired, value:", this.value);
+      sendButton.disabled = this.value.trim() === "";
+    });
+
+    // Add keydown event listener for Enter key
+    chatInput.addEventListener("keydown", function (e) {
+      console.log("Keydown event fired, key:", e.key);
+      if (e.key === "Enter" && this.value.trim()) {
+        console.log("Enter key pressed with text, sending message");
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Add click event listener for send button
+    sendButton.addEventListener("click", function () {
+      console.log("Send button clicked");
+      sendMessage();
+    });
+
     // Handle suggested questions
-    document.querySelectorAll('.suggested-question').forEach(button => {
-        button.addEventListener('click', function() {
-            chatInput.value = this.textContent;
-            sendButton.disabled = false;
-            sendMessage();
-        });
+    document.querySelectorAll(".suggested-question").forEach((button) => {
+      button.addEventListener("click", function () {
+        console.log("Suggested question clicked:", this.textContent);
+        chatInput.value = this.textContent;
+        sendButton.disabled = false;
+        sendMessage();
+      });
     });
-    
+
     // Focus input on load
     chatInput.focus();
+  });
 </script>
 {% endblock %}
