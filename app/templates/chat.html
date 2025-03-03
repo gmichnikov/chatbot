@@ -28,6 +28,12 @@
     </div>
 
     <div class="chat-main">
+      <div class="spinner-container" id="loadingSpinner">
+        <div class="spinner"></div>
+        <div class="spinner"></div>
+        <div class="spinner"></div>
+      </div>
+
       <div class="chat-messages" id="chatMessages">
         <div class="empty-state" id="emptyState">
           <p>Send a message to start chatting with the Poetry Bot</p>
@@ -40,11 +46,6 @@
               How does poetry heal the soul?
             </button>
           </div>
-        </div>
-        <div class="spinner-container" id="loadingSpinner">
-          <div class="spinner"></div>
-          <div class="spinner"></div>
-          <div class="spinner"></div>
         </div>
       </div>
 
@@ -77,6 +78,10 @@
   const newConversationBtn = document.getElementById("newConversationBtn");
   const deleteButton = document.getElementById("deleteButton");
   const loadingSpinner = document.getElementById("loadingSpinner");
+
+  if (loadingSpinner.parentNode) {
+    loadingSpinner.parentNode.removeChild(loadingSpinner);
+  }
 
   // Add debug console logs to check elements
   console.log("Chat input element found:", chatInput);
@@ -217,7 +222,6 @@
     );
   }
 
-  // Function to send a message
   function sendMessage() {
     console.log("sendMessage function called");
     const message = chatInput.value.trim();
@@ -232,6 +236,7 @@
     console.log("Disabling send button for loading state");
     sendButton.disabled = true;
 
+    // Show loading spinner
     showLoadingSpinner();
 
     // Prepare request data
@@ -260,6 +265,7 @@
       .then((data) => {
         console.log("Response data:", data);
 
+        // Hide loading spinner
         hideLoadingSpinner();
 
         // Remove empty state when we get a successful response
@@ -290,8 +296,8 @@
       })
       .catch((error) => {
         console.error("Error sending message:", error);
+        // Hide loading spinner in case of error
         hideLoadingSpinner();
-
         alert("Error sending message. Please try again.");
         sendButton.disabled = false;
       });
@@ -364,6 +370,8 @@
   });
 
   function showLoadingSpinner() {
+    // Append spinner to the end of the messages container to ensure it's after all messages
+    chatMessages.appendChild(loadingSpinner);
     loadingSpinner.style.display = "block";
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
