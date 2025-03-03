@@ -5,6 +5,7 @@ from uuid import uuid4
 import json
 import requests
 import os
+from openai import OpenAI
 
 # Create a blueprint for chat-related routes
 chat_bp = Blueprint('chat', __name__)
@@ -138,40 +139,27 @@ def delete_conversation(conversation_id):
 
 def generate_bot_response(user_message):
     """
-    Generate a response from the chatbot.
-    This is a placeholder - in a real app, you would:
-    1. Call an external API (OpenAI, Anthropic, etc.)
-    2. Process the response
-    3. Return the formatted response
+    Generate a response from the chatbot using OpenAI's API.
     """
-    # Placeholder poetry responses (from your example)
-    poetry_responses = [
-        "The road not taken, yields no regrets, only paths anew.",
-        "Silently the moon watches, keeper of night's secrets.",
-        "Between the shadows and light, truth finds its voice.",
-        "Stars scatter like thoughts across the infinite canvas of night.",
-        "Time flows like water through fingers trying to hold the moment.",
-        "In whispered winds, yesterday's memories dance with tomorrow's dreams.",
-        "Mountains stand as witnesses to our brief, beautiful journey.",
-        "Words unsaid often speak the loudest in the chambers of the heart."
-    ]
-    
-    # In a real implementation, you'd use an API like:
-    # API_KEY = os.environ.get('OPENAI_API_KEY')
-    # response = requests.post(
-    #     'https://api.openai.com/v1/chat/completions',
-    #     headers={
-    #         'Authorization': f'Bearer {API_KEY}',
-    #         'Content-Type': 'application/json'
-    #     },
-    #     json={
-    #         'model': 'gpt-3.5-turbo',
-    #         'messages': [{'role': 'user', 'content': user_message}],
-    #         'max_tokens': 150
-    #     }
-    # )
-    # return response.json()['choices'][0]['message']['content']
-    
-    # For now, just return a random poetry response
-    import random
-    return random.choice(poetry_responses)
+    try:
+        API_KEY = os.getenv('OPENAI_API_KEY')
+        if not API_KEY:
+            raise ValueError("OpenAI API key not found in environment variables")
+
+        client = OpenAI(api_key=API_KEY)
+
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=150,
+            temperature=0.7
+        )
+        
+        return completion.choices[0].message.content
+        
+    except Exception as e:
+        current_app.logger.error(f"OpenAI API error: {str(e)}")
+        return "I apologize, but I'm having trouble generating a response right now."
