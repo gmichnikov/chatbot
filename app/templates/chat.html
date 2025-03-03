@@ -41,6 +41,11 @@
             </button>
           </div>
         </div>
+        <div class="spinner-container" id="loadingSpinner">
+          <div class="spinner"></div>
+          <div class="spinner"></div>
+          <div class="spinner"></div>
+        </div>
       </div>
 
       <div class="chat-input-area">
@@ -71,6 +76,7 @@
   const conversationList = document.getElementById("conversationList");
   const newConversationBtn = document.getElementById("newConversationBtn");
   const deleteButton = document.getElementById("deleteButton");
+  const loadingSpinner = document.getElementById("loadingSpinner");
 
   // Add debug console logs to check elements
   console.log("Chat input element found:", chatInput);
@@ -226,6 +232,8 @@
     console.log("Disabling send button for loading state");
     sendButton.disabled = true;
 
+    showLoadingSpinner();
+
     // Prepare request data
     const requestData = {
       message: message,
@@ -251,6 +259,8 @@
       })
       .then((data) => {
         console.log("Response data:", data);
+
+        hideLoadingSpinner();
 
         // Remove empty state when we get a successful response
         hideEmptyState();
@@ -280,6 +290,8 @@
       })
       .catch((error) => {
         console.error("Error sending message:", error);
+        hideLoadingSpinner();
+
         alert("Error sending message. Please try again.");
         sendButton.disabled = false;
       });
@@ -350,6 +362,15 @@
         });
     }
   });
+
+  function showLoadingSpinner() {
+    loadingSpinner.style.display = "block";
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function hideLoadingSpinner() {
+    loadingSpinner.style.display = "none";
+  }
 
   // Load conversations on page load
   document.addEventListener("DOMContentLoaded", function () {

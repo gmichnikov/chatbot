@@ -99,7 +99,7 @@ def send_message():
     db.session.commit()
     
     # Get bot response - in a real app you'd call an actual API
-    bot_response = generate_bot_response(user_message)
+    bot_response = generate_bot_response(user_message, conversation_id, current_user.id)
     
     # Save the bot response
     bot_chat_message = ChatMessage(
@@ -137,24 +137,45 @@ def delete_conversation(conversation_id):
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-def generate_bot_response(user_message):
+def generate_bot_response(user_message, conversation_id, user_id):
     """
-    Generate a response from the chatbot using OpenAI's API.
+    Generate a response from the chatbot using OpenAI's API,
+    including the full conversation history.
     """
     try:
         API_KEY = os.getenv('OPENAI_API_KEY')
         if not API_KEY:
             raise ValueError("OpenAI API key not found in environment variables")
 
+        # Get the conversation history
+        messages = ChatMessage.query.filter(
+            ChatMessage.user_id == user_id,
+            ChatMessage.conversation_id == conversation_id
+        ).order_by(
+            ChatMessage.timestamp
+        ).all()
+
+        # Format messages for the OpenAI API
+        formatted_messages = [
+            {"role": "system", "content": "You are a helpful assistant."}
+        ]
+        
+        # Add conversation history (excluding the most recent user message which we'll add separately)
+        for msg in messages:
+            if msg.is_user:
+                formatted_messages.append({"role": "user", "content": msg.content})
+            else:
+                formatted_messages.append({"role": "assistant", "content": msg.content})
+                
+        # Add the current user message
+        formatted_messages.append({"role": "user", "content": user_message})
+
         client = OpenAI(api_key=API_KEY)
 
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": user_message}
-            ],
-            max_tokens=150,
+            messages=formatted_messages,
+            max_tokens=1000,
             temperature=0.7
         )
         
