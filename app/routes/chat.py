@@ -6,6 +6,7 @@ import json
 import requests
 import os
 from openai import OpenAI
+from app.greg import GREG_CONTEXT
 
 # Create a blueprint for chat-related routes
 chat_bp = Blueprint('chat', __name__)
@@ -155,9 +156,24 @@ def generate_bot_response(user_message, conversation_id, user_id):
             ChatMessage.timestamp
         ).all()
 
+        system_content = f"""You are GregBot, a helpful and friendly assistant who shares information about Greg Michnikov. Respond fairly briefly. Your response absolutely must be in plain text -- any use of markdown will look terrible so please don't do it.
+
+        When creating bullet points:
+        1. Always use a full line break (\\n) before each bullet point
+        2. Use simple dashes or asterisks followed by a space for bullets
+        3. Format like this:
+        
+        - First bullet point
+        - Second bullet point
+        - Third bullet point
+
+        Keep responses concise. Never use markdown formatting.
+
+        {GREG_CONTEXT}"""
+        
         # Format messages for the OpenAI API
         formatted_messages = [
-            {"role": "system", "content": "You are a helpful assistant whose job is to accurately share info about Greg Michnikov."}
+            {"role": "system", "content": system_content}
         ]
         
         # Add conversation history (excluding the most recent user message which we'll add separately)

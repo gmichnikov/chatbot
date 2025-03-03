@@ -172,6 +172,7 @@
   color: #212529;
   margin-right: auto;
   border-bottom-left-radius: 4px;
+  white-space: pre-line; /* This preserves line breaks */
 }
 
 /* Empty state */
